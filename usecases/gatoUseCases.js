@@ -3,13 +3,20 @@ const Gato = require('../entities/gato');
 
 const getGatosDB = async () => {
     try {
-        const { rows } = await pool.query(`SELECT * FROM gatos ORDER BY descricao`);
-        return rows.map((gato) => 
-            new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_id));
+        const { rows } = await pool.query(`
+            SELECT gatos.codigo, gatos.descricao, gatos.vacinas, gatos.nome, gatos.padrinho_id, padrinhos.nome AS padrinho_nome
+            FROM gatos
+            LEFT JOIN padrinhos ON gatos.padrinho_id = padrinhos.codigo
+            ORDER BY gatos.descricao
+        `);
+
+        return rows.map((gato) =>
+            new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_nome, gato.padrinho_id)
+        );
     } catch (err) {
         throw "Erro: " + err;
     }
-}
+};
 
 const addGatoDB = async (body) => {
     try {
@@ -18,7 +25,7 @@ const addGatoDB = async (body) => {
             VALUES ($1, $2, $3, $4) RETURNING codigo, descricao, vacinas, nome, padrinho_id`, 
             [descricao, vacinas, nome, padrinhoId]);
         const gato = results.rows[0];
-        return new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_id);
+        return new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_nome, gato.padrinho_id)
     } catch (err) {
         throw "Erro ao inserir o gato: " + err;
     }
@@ -34,7 +41,7 @@ const updateGatoDB = async (body) => {
             throw `Nenhum registro encontrado com o código ${codigo} para ser alterado`;
         }
         const gato = results.rows[0];
-        return new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_id);
+        return new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_nome, gato.padrinho_id)
     } catch (err) {
         throw "Erro ao alterar o gato: " + err;
     }
@@ -60,7 +67,7 @@ const getGatoPorCodigoDB = async (codigo) => {
             throw `Nenhum registro encontrado com o código ${codigo}`;
         } else {
             const gato = results.rows[0];
-            return new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_id);
+            return new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_nome, gato.padrinho_id)
         }
     } catch (err) {
         throw "Erro ao recuperar o gato: " + err;
