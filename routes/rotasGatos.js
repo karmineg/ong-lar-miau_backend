@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const { getGatos, addGato, updateGato,
-    deleteGato, getGatoPorCodigo } = require('../controllers/gatoController');
+    deleteGato, getGatoPorCodigo, getGatosPorPadrinho } = require('../controllers/gatoController');
 
 const rotasGatos = new Router();
 
@@ -13,5 +13,8 @@ rotasGatos.route('/gato')
 rotasGatos.route('/gato/:codigo')
            .delete(deleteGato)
            .get(getGatoPorCodigo);
+
+rotasGatos.route('/gato/padrinho/:padrinhoId')
+           .get(getGatosPorPadrinho);
 
 module.exports = { rotasGatos };

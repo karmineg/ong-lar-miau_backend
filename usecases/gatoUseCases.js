@@ -74,4 +74,26 @@ const getGatoPorCodigoDB = async (codigo) => {
     }
 }
 
-module.exports = { getGatosDB, addGatoDB, updateGatoDB, deleteGatoDB, getGatoPorCodigoDB };
+const getGatosPorPadrinhoDB = async (padrinhoId) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT gatos.codigo, gatos.descricao, gatos.vacinas, gatos.nome, gatos.padrinho_id, padrinhos.nome AS padrinho_nome
+            FROM gatos
+            LEFT JOIN padrinhos ON gatos.padrinho_id = padrinhos.codigo
+            WHERE gatos.padrinho_id = $1
+            ORDER BY gatos.descricao
+        `, [padrinhoId]);
+
+        if (rows.length === 0) {
+            return []; 
+        }
+
+        return rows.map((gato) =>
+            new Gato(gato.codigo, gato.descricao, gato.vacinas, gato.nome, gato.padrinho_nome, gato.padrinho_id)
+        );
+    } catch (err) {
+        throw "Erro ao buscar gatos por padrinho: " + err;
+    }
+};
+
+module.exports = { getGatosDB, addGatoDB, updateGatoDB, deleteGatoDB, getGatoPorCodigoDB, getGatosPorPadrinhoDB };

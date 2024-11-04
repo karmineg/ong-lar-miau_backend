@@ -1,5 +1,5 @@
 const { getGatosDB, addGatoDB, updateGatoDB, 
-    deleteGatoDB, getGatoPorCodigoDB } = require('../usecases/gatoUseCases');
+    deleteGatoDB, getGatoPorCodigoDB, getGatosPorPadrinhoDB  } = require('../usecases/gatoUseCases');
 
 const getGatos = async (request, response) => {
     await getGatosDB()
@@ -57,6 +57,23 @@ const getGatoPorCodigo = async (request, response) => {
         }));
 }
 
+const getGatosPorPadrinho = async (request, response) => {
+    await getGatosPorPadrinhoDB(parseInt(request.params.padrinhoId))
+        .then(data => {
+            if (data.length === 0) {
+                return response.status(200).json({
+                    status: 'success',
+                    message: 'Nenhum gato vinculado a este ID de padrinho.'
+                });
+            }
+            response.status(200).json(data);
+        })
+        .catch(err => response.status(400).json({
+            status: 'error',
+            message: 'Erro ao recuperar gatos para o padrinho: ' + err
+        }));
+};
+
 module.exports = {
-    getGatos, addGato, updateGato, deleteGato, getGatoPorCodigo
+    getGatos, addGato, updateGato, deleteGato, getGatoPorCodigo, getGatosPorPadrinho
 };
